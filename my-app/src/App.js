@@ -1,32 +1,63 @@
-import logo from './logo.svg';
+import React, { useState, useEffect } from 'react';
 import './App.css';
+import Header from './Components/Header';
+import Hero from './Components/Hero';
+import Features from './Components/Features';
+import Events from './Components/Events';
+import Community from './Components/Community';
+import Footer from './Components/Footer';
 import Auth from './Components/Auth';
-import Cours from './Components/Cours';
-import { Component } from 'react';
 
+function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-class  App extends Component{
-  state={
-    login:false,
-    id_user:null,
+  useEffect(() => {
+    // Check if user is already logged in
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      setIsAuthenticated(true);
+      // You would typically validate the token here
+    }
+    setLoading(false);
+  }, []);
+
+  const handleLogin = (userData) => {
+    setIsAuthenticated(true);
+    setUser(userData);
+    localStorage.setItem('authToken', userData.token);
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setUser(null);
+    localStorage.removeItem('authToken');
+  };
+
+  if (loading) {
+    return (
+      <div className="loading-screen">
+        <div className="loading-spinner"></div>
+        <p>جاري التحميل...</p>
+      </div>
+    );
   }
 
-  Checklogin=(id_user)=>{
-    console.log(id_user)
-    if(this.state.login==false){this.setState({login:true,id_user:id_user})}
-  }
-  logout=()=>{
-    this.setState({login:false})
+  if (!isAuthenticated) {
+    return <Auth onLogin={handleLogin} />;
   }
 
-  render(){
   return (
-    <>
-    {(this.state.login==false)?
-    <Auth Checklogin={this.Checklogin}/>:<Cours logout={this.logout} id_user={this.state.id_user}/>}
-    </>
+    <div className="App">
+      <Header user={user} onLogout={handleLogout} />
+      <Hero />
+      <Features />
+      <Events />
+      <Community />
+      <Footer />
+    </div>
   );
-}
 }
 
 export default App;
